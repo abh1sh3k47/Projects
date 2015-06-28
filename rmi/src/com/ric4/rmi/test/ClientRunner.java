@@ -4,6 +4,11 @@ import java.util.Random;
 
 import com.ric4.rmi.Client;
 
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 public class ClientRunner {
 
 	public static void main(String... args) throws Exception

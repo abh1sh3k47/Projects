@@ -2,6 +2,11 @@ package com.ric4.chatter;
 
 import java.io.Serializable;
 
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 public class ChatMessage implements Serializable
 {
 	String message;

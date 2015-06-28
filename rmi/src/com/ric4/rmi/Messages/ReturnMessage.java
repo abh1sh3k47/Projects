@@ -1,5 +1,10 @@
 package com.ric4.rmi.Messages;
 
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 public class ReturnMessage extends Message
 {
 	private Object o;

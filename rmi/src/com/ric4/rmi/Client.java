@@ -4,6 +4,11 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 public class Client 
 {
 	private final Map<Class,Object> serviceContainer = new HashMap<Class,Object>();

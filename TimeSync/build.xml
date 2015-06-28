@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<project name="TimeSync" default="compress">
+
+	<path id="product.classpath">
+		<fileset dir=".">
+			<include name="*.jar" />
+			<include name="lib/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init">
+
+		<mkdir dir="bin" />
+		<delete includeemptydirs="true">
+			<fileset dir="bin" />
+		</delete>
+		<mkdir dir="bin" />
+
+		<mkdir dir="Binary" />
+		<mkdir dir="Binary/lib" />
+		<delete includeemptydirs="true">
+			<fileset dir="Binary/lib" />
+			<fileset dir="Binary" />
+		</delete>
+		<mkdir dir="Binary" />
+		<mkdir dir="Binary/lib" />
+
+
+	</target>
+
+	<target name="compile" description="compile the java source files"
+		depends="init">
+		<javac srcdir="src" destdir="bin" classpathref="product.classpath">
+		</javac>
+	</target>
+
+	<target name="compress" depends="compile">
+		<jar destfile="binary/TimeSync.jar" basedir="bin" />
+		<copy todir="binary/lib">
+			<fileset dir="lib">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="binary">
+		    <fileset dir=".">
+				<include name="Run.bat" />
+			</fileset>
+		</copy>
+	</target>
+
+</project>

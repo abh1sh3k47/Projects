@@ -1,8 +1,12 @@
 package com.ric4.rmi.Messages;
 import java.io.Serializable;
 
-
-public class Message implements Serializable
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
+public abstract class Message implements Serializable
 {
 	
 }

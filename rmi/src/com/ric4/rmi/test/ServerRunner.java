@@ -2,6 +2,11 @@ package com.ric4.rmi.test;
 
 import com.ric4.rmi.Server;
 
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 public class ServerRunner {
 
 	public static void main(String[] args) throws Exception 

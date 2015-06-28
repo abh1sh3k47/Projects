@@ -18,7 +18,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import com.ric4.rmi.Messages.MethodCallMessage;
 import com.ric4.rmi.Messages.ReturnMessage;
 
-
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 public class Server {
 
 	ServerSocket serverSocket = null;

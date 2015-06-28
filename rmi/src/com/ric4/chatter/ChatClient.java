@@ -6,6 +6,11 @@ import java.util.Scanner;
 
 import com.ric4.rmi.Client;
 
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 public class ChatClient
 {
 
