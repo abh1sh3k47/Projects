@@ -1,0 +1,31 @@
+<project name="MyProject" default="build" basedir=".">
+
+	<property name="base" location=".." />
+	<property name="src" location="${base}/src" />
+	<property name="build" location="${base}/build" />
+	<property name="release" location="${base}/release" />
+
+	<target name="clean" description="clean up">
+		<delete dir="${build}" />
+		<delete dir="${release}" />
+	</target>
+
+	<target name="init" depends="clean">
+		<mkdir dir="${build}" />
+		<mkdir dir="${release}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<javac srcdir="${src}" destdir="${build}" />
+	</target>
+
+	<target name="build" depends="compile" description="generate the distribution">
+		<mkdir dir="${release}/lib" />
+		<jar jarfile="${release}/lib/rmiLib.jar" basedir="${build}" />
+		<copy todir="${release}">
+			<fileset dir="${base}">
+				<include name="*.bat" />
+			</fileset>
+		</copy>
+	</target>
+</project>
