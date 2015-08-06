@@ -4,6 +4,9 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ric4.rmi.validation.ICredentials;
+import com.ric4.rmi.validation.ValidateAllClientValidator;
+
 /**
  * 
  * @author abh1sh3k47
@@ -16,7 +19,7 @@ public class Client
 	private Socket serverSocket;
 	private ConnectionWatcher watcher;	
 
-	public Client(String hostname,int port)
+	public Client(String hostname,int port, ICredentials credentials)
 	{
 		try
 		{
@@ -27,7 +30,7 @@ public class Client
 					System.err.println("Server "+s.getLocalAddress()+" Went Away!!");
 				}
 			};
-			watcher = new ConnectionWatcher(serverSocket,serviceContainer,callback);
+			watcher = new ConnectionWatcher(serverSocket,serviceContainer,new ValidateAllClientValidator(),credentials,callback);
 			watcher.start();
 		}
 		catch(Exception e)
@@ -35,8 +38,13 @@ public class Client
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public Client(String hostname,int port)
+	{
+		this(hostname,port,null);
+	}
 
-	public Object getService(final Class c) throws IOException
+	public <K> K getService(final Class<K> c) throws IOException
 	{
 		return watcher.getService(c);
 	}

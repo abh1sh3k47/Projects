@@ -1,24 +1,26 @@
 package com.ric4.rmi;
 
+/**
+ * 
+ * @author abh1sh3k47
+ *
+ */
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ric4.rmi.Messages.LoginMessage;
 import com.ric4.rmi.Messages.Message;
 import com.ric4.rmi.Messages.MethodCallMessage;
 import com.ric4.rmi.Messages.ReturnMessage;
+import com.ric4.rmi.validation.ClientValidator;
+import com.ric4.rmi.validation.ICredentials;
 
-/**
- * 
- * @author abh1sh3k47
- *
- */
 class ConnectionWatcher extends Thread
 {
 	private final ObjectInputStream is;
@@ -27,48 +29,81 @@ class ConnectionWatcher extends Thread
 	private final Map<Class,Object> serviceContainer;
 	private final Map<Class,RmiInvocationHandler> invocationHandlerMap;
 	private final IConnectionResetCallback connResetCallback;
+	private final ClientValidator clientValidator;
+	private final ICredentials clientCredentials;
 
 	private static final Message message = new Message();
 
-	ConnectionWatcher(Socket clientSocket,Map<Class,Object> serviceContainer, IConnectionResetCallback callback) throws IOException
+	ConnectionWatcher(Socket clientSocket,Map<Class,Object> serviceContainer, ClientValidator clientValidator, ICredentials clientCredentials, IConnectionResetCallback callback) throws IOException
 	{
 		this.clientSocket = clientSocket;
 		this.os= new ObjectOutputStream(clientSocket.getOutputStream());
 		this.is=new ObjectInputStream(clientSocket.getInputStream());
 		this.serviceContainer = serviceContainer;
 		this.invocationHandlerMap = new ConcurrentHashMap<Class,RmiInvocationHandler>(); //invocationHandlerMap;
+		this.clientValidator = clientValidator;
 		this.connResetCallback=callback;
+		this.clientCredentials = clientCredentials;
 		setDaemon(true);
 	}
 
+	ConnectionWatcher(Socket clientSocket,Map<Class,Object> serviceContainer, ClientValidator clientValidator, IConnectionResetCallback callback) throws IOException
+	{
+		this(clientSocket,serviceContainer,clientValidator,null,callback);
+	}
+	
 	@Override
 	public void run() 
 	{
-		while(true)
+		try 
 		{
-			try 
+			//If login is not required this will just act as a handshake.
+			LoginMessage loginMessage = new LoginMessage(clientCredentials);
+			synchronized(os)
 			{
-				Object o = is.readObject();
+				os.writeObject(loginMessage);
+				os.flush();
+			}
+			
+			Object o = is.readObject();
+			//this should be a LoginMessage
+			if(!(o instanceof LoginMessage))
+			{
+				clientSocket.close();
+				System.err.println("Client Didnt login.");
+				connResetCallback.connectionReset(clientSocket);
+				return;
+			}
+			
+			LoginMessage loginMsg = (LoginMessage) o;
+			if(!clientValidator.validate(loginMsg.getCredentials()))
+			{
+				clientSocket.close();
+				System.err.println("Client login FAILED!!");
+				connResetCallback.connectionReset(clientSocket);
+				return;
+			}
+			
+			while(true)
+			{
+				o = is.readObject();
 				MessageHandler msgHandler = new MessageHandler(o);
 				msgHandler.start();
-			} 
-			catch(IOException ioe)
-			{
-				connResetCallback.connectionReset(clientSocket);
-				System.err.println(ioe);
-				break;
 			}
-			catch (Exception e) 
-			{
-				connResetCallback.connectionReset(clientSocket);
-				System.err.println(e);
-				break;
-			} 
-
+		} 
+		catch(IOException ioe)
+		{
+			connResetCallback.connectionReset(clientSocket);
+			System.err.println(ioe);
+		}
+		catch (Exception e) 
+		{
+			connResetCallback.connectionReset(clientSocket);
+			System.err.println(e);
 		}
 	}
 
-	public Object getService(final Class c) throws IOException
+	public <K> K getService(final Class<K> c) throws IOException
 	{
 		RmiInvocationHandler inv;
 		if(invocationHandlerMap.containsKey(c))
@@ -80,9 +115,8 @@ class ConnectionWatcher extends Thread
 			inv = new RmiInvocationHandler(os,c);
 			registerInvocationHandler(c, inv);
 		}
-		@SuppressWarnings("unchecked")
 		Object o = Proxy.newProxyInstance(c.getClassLoader(), new Class[]{c},inv);
-		return o;
+		return (K)o;
 	}
 
 	void registerInvocationHandler(Class c,RmiInvocationHandler inv)
@@ -108,7 +142,7 @@ class ConnectionWatcher extends Thread
 					MethodCallMessage mcm = (MethodCallMessage)message;
 					Object service = serviceContainer.get(mcm.getC());
 					Object result = null;
-					Throwable t = null;
+					Throwable throwable = null;
 					for(Method m:service.getClass().getMethods())
 					{
 						if(m.getName().equals(mcm.getMethod()))
@@ -120,12 +154,12 @@ class ConnectionWatcher extends Thread
 							catch(Throwable e)
 							{
 								// To Propagate back
-								t = e;
+								throwable = e;
 							}
 						}
 					}
 					ReturnMessage rm = new ReturnMessage(result,mcm.getC(),mcm.getCallId());
-					rm.setThrowable(t);
+					rm.setThrowable(throwable);
 					synchronized(os)
 					{
 						os.writeObject(rm);

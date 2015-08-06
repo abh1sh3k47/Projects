@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author abh1sh3k47
  *
  */
-public abstract class Message implements Serializable
+public class Message implements Serializable
 {
 	
 }

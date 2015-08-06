@@ -3,6 +3,7 @@ package com.ric4.rmi.test;
 import java.util.Random;
 
 import com.ric4.rmi.Client;
+import com.ric4.rmi.validation.ICredentials;
 
 /**
  * 
@@ -13,25 +14,25 @@ public class ClientRunner {
 
 	public static void main(String... args) throws Exception
 	{
-		Client c = new Client("localhost",27015);
-		IFactorialService ifs = (IFactorialService)c.getService(IFactorialService.class);
-		IDuplicateService ids = (IDuplicateService)c.getService(IDuplicateService.class);
-		
+		Client c = new Client("localhost",27015,new ICredentials() {});
+		IFactorialService ifs = c.getService(IFactorialService.class);
+		IDuplicateService ids = c.getService(IDuplicateService.class);
+
 		//System.out.println(ifs.getFactorial(10));
-		
+
 		for(int i=0;i<10;i++)
 		{
 			Thread t1 = new FactPrinter(ifs);
 			t1.start();
 		}
-		
+
 		for(int i=0;i<10;i++)
 		{
 			Thread t1 = new DupPrinter(ids,i);
 			//t1.start();
 		}
 	}
-	
+
 	static class FactPrinter extends Thread
 	{
 		IFactorialService ifs;
@@ -52,7 +53,7 @@ public class ClientRunner {
 				{
 					System.err.println("Factorial Mismatch for "+n+" "+fact+" should be -"+myFact);
 				}
-				System.out.println("Factorial of "+n+" is "+fact);
+				//System.out.println("Factorial of "+n+" is "+fact);
 			}
 		}
 	}
@@ -72,23 +73,23 @@ public class ClientRunner {
 		public void run() {
 			while(true)
 			{
-			byte [] bytes = new byte[r.nextInt(50)];
-			r.nextBytes(bytes);
-			String s = "";
-			for(byte b:bytes)
-			{
-				s += b;
-			}
-			
-			String dup = ids.duplicate(s);
-			if(!dup.contains(s)){
-				System.err.println(dup+" MISMATCHED "+s); 
-			}
-			System.out.println("Duplicate of '"+s+"' = "+ ids.duplicate(s));
+				byte [] bytes = new byte[r.nextInt(50)];
+				r.nextBytes(bytes);
+				String s = "";
+				for(byte b:bytes)
+				{
+					s += b;
+				}
+
+				String dup = ids.duplicate(s);
+				if(!dup.contains(s)){
+					System.err.println(dup+" MISMATCHED "+s); 
+				}
+				//System.out.println("Duplicate of '"+s+"' = "+ ids.duplicate(s));
 			}
 		}
 	}
-	
+
 	static int factorial(int i)
 	{
 		if(i<0) throw new NumberFormatException();
@@ -100,5 +101,5 @@ public class ClientRunner {
 		}
 		return fact;
 	}
-	
+
 }

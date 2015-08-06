@@ -11,5 +11,4 @@ public interface IChatMaster
 {
 	public void sendMsgToAll(ChatMessage msg) throws IOException;
 	public void recieveMsg(ChatMessage msg) throws IOException;
-	
 }

@@ -17,9 +17,9 @@ public class ChatClient
 	static long clientId;
 	public static void main(String[] args) throws IOException 
 	{
-		Client c = new Client("localhost",27015);
+		Client c = new Client("localhost",27016);
 		c.registerService(IChatMaster.class, new ClientChatMaster(c));
-		IChatMaster serverChatMaster = (IChatMaster) c.getService(IChatMaster.class);
+		IChatMaster serverChatMaster = c.getService(IChatMaster.class);
 		
 		Random r = new Random(System.currentTimeMillis()%100);
 		clientId = r.nextInt();

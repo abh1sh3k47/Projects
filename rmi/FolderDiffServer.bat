@@ -1,0 +1,1 @@
+java -cp "./lib/*" com.ric4.folderDiff.FolderDiffServer %*

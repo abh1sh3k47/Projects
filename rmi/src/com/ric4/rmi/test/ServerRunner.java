@@ -1,17 +1,29 @@
 package com.ric4.rmi.test;
 
 import com.ric4.rmi.Server;
+import com.ric4.rmi.validation.ClientValidator;
+import com.ric4.rmi.validation.ICredentials;
 
 /**
  * 
  * @author abh1sh3k47
  *
  */
-public class ServerRunner {
+public class ServerRunner 
+{
 
 	public static void main(String[] args) throws Exception 
 	{
-		Server s = new Server(27015);
+		Server s = new Server(27015,new ClientValidator() {
+			@Override
+			public boolean isValid(ICredentials credentials) {
+				System.out.println("Credentials "+credentials);
+				if(credentials != null)
+					return true;
+				return false;
+			}
+		});
+		
 		s.registerService(IFactorialService.class, new FactorialService());
 		s.registerService(IDuplicateService.class, new DuplucateService());
 	}
@@ -30,8 +42,8 @@ public class ServerRunner {
 				fact = fact*k;
 			}
 			
-			int z = 0;
-			int p = 100/z;
+			//int z = 0;
+			//int p = 100/z;
 
 			/*	try {
 			Thread.sleep(2000);

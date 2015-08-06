@@ -14,7 +14,7 @@ public class ChatServer
 {
 	public static void main(String... args) throws IOException
 	{
-		Server s = new Server(27015);
+		Server s = new Server(27016);
 		s.registerService(IChatMaster.class, new ServerChatMaster(s));
 	}
 	

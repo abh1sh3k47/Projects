@@ -1,22 +1,16 @@
 package com.ric4.rmi;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import com.ric4.rmi.Messages.MethodCallMessage;
-import com.ric4.rmi.Messages.ReturnMessage;
+import com.ric4.rmi.validation.ClientValidator;
+import com.ric4.rmi.validation.ValidateAllClientValidator;
 
 /**
  * 
@@ -30,14 +24,22 @@ public class Server {
 	final Map<Class,RmiInvocationHandler> invocationHandlerMap = new HashMap<Class,RmiInvocationHandler>();
 	ExecutorService executor;
 	Map<Socket,ConnectionWatcher> activeClients;
+	ClientValidator clientValidator;
 
-	public Server(int port) throws IOException
+	public static final Integer MAX_ACTIVE_WATCHER_THREADS = 100;
+	public Server(int port, ClientValidator clientValidator) throws IOException
 	{
 		activeClients = Collections.synchronizedMap(new HashMap<Socket,ConnectionWatcher>());
 		serverSocket = new ServerSocket(port);
-		executor = new ScheduledThreadPoolExecutor(5);
+		executor = new ScheduledThreadPoolExecutor(MAX_ACTIVE_WATCHER_THREADS);
+		this.clientValidator = clientValidator;
 		ClientConnectionHandler c = new ClientConnectionHandler(serverSocket);
 		c.start();
+	}
+	
+	public Server(int port) throws IOException
+	{
+		this(port,new ValidateAllClientValidator());
 	}
 
 	public void registerService(Class serviceClass, Object service)
@@ -45,7 +47,7 @@ public class Server {
 		serviceContainer.put(serviceClass, service);
 	}
 
-	public Object getClientService(Socket s,Class service) throws IOException
+	public <K> K getClientService(Socket s,Class<K> service) throws IOException
 	{
 		return activeClients.get(s).getService(service);
 	}
@@ -80,7 +82,7 @@ public class Server {
 				try
 				{
 					Socket clientSocket = serverSocket.accept();
-					ConnectionWatcher watcher = new ConnectionWatcher(clientSocket,serviceContainer,callback);
+					ConnectionWatcher watcher = new ConnectionWatcher(clientSocket,serviceContainer,clientValidator,callback);
 					activeClients.put(clientSocket, watcher);
 					executor.execute(watcher);
 				}
