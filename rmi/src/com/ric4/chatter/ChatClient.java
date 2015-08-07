@@ -17,7 +17,17 @@ public class ChatClient
 	static long clientId;
 	public static void main(String[] args) throws IOException 
 	{
-		Client c = new Client("localhost",27016);
+		if(args.length < 2) 
+		{
+			System.out.println("Invalid Usage!!");
+			return;
+		}
+		
+		String hostname = args[0];
+		String portS = args[1];
+		int port = Integer.parseInt(portS);
+		
+		Client c = new Client(hostname,port);
 		c.registerService(IChatMaster.class, new ClientChatMaster(c));
 		IChatMaster serverChatMaster = c.getService(IChatMaster.class);
 		

@@ -14,7 +14,16 @@ public class ChatServer
 {
 	public static void main(String... args) throws IOException
 	{
-		Server s = new Server(27016);
+		if(args.length < 1) 
+		{
+			System.out.println("Invalid Usage!!");
+			return;
+		}
+		
+		String portS = args[0];
+		int port = Integer.parseInt(portS);
+		
+		Server s = new Server(port);
 		s.registerService(IChatMaster.class, new ServerChatMaster(s));
 	}
 	

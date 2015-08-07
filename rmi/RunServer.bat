@@ -1,1 +1,0 @@
-java -cp "./Lib/*" com.ric4.chatter.ChatServer
