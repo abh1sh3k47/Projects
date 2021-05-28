@@ -12,6 +12,7 @@ import com.ric4.rmi.Server;
  */
 public class ChatServer 
 {
+	static int test = 10;
 	public static void main(String... args) throws IOException
 	{
 		if(args.length < 1) 
