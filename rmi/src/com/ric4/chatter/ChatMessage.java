@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public class ChatMessage implements Serializable
 {
+        static int branch1 = 0;
 	String message;
 	long senderId;
 	
