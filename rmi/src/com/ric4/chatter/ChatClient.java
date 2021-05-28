@@ -13,7 +13,7 @@ import com.ric4.rmi.Client;
  */
 public class ChatClient
 {
-
+	static long test;
 	static long clientId;
 	public static void main(String[] args) throws IOException 
 	{
